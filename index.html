@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Ape Coin</title>
+  <link rel="icon" type="image/png" href="/gorilla-icon.png">
+  <style>
+      html {
+          font-size: 30px;
+      }
+      html,
+      body {
+          width: 100%;
+          height: 100%;
+          padding: 0;
+          margin: 0;
+          font-family: Roboto,sans-serif;
+          color: #E1E1E1;
+      }
+      .content {
+          background-color: #1d1d1d;
+          height: 100%;
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+      }
+      .logo {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+      }
+      .logo__img {
+          display: flex;
+          justify-content: center;
+          width: 2.5rem;
+      }
+      .logo__img img {
+          display: block;
+          width: 100%;
+          height: auto;
+      }
+      .logo__name {
+          margin-top: 0.25rem;
+
+          font-weight: 500;
+          font-size: 1rem;
+      }
+      .quote {
+          margin-top: 1rem;
+          font-style: italic;
+          margin-bottom: 2rem;
+          text-transform: uppercase;
+          width: 70%;
+          text-align: center;
+          line-height: 1.3rem;
+      }
+      .links {
+          position: absolute;
+          bottom: 1rem;
+          font-weight: bolder;
+          font-size: 0.6rem;
+          cursor: pointer;
+          width: 100%;
+          text-align: center;
+      }
+      .links__title {
+          opacity: .6;
+          margin-bottom: 10px;
+      }
+      .links__content {
+          display: flex;
+          justify-content: center;
+      }
+
+      a:link,
+      a:visited,
+      a:hover,
+      a:active{
+          color: #E1E1E1;
+          text-decoration: none;
+      }
+
+      .link {
+          opacity: 0.2;
+          transition: opacity .2s ease-in;
+          margin: 2px 10px;
+      }
+      .link:hover {
+          opacity: 0.5;
+      }
+  </style>
+</head>
+<body>
+  <div class="content">
+    <div class="logo">
+      <div class="logo__img">
+        <img src="/gorilla.png" alt="gorilla">
+      </div>
+      <div class="logo__name">
+        Ape-coin
+      </div>
+    </div>
+    <div class="quote" id="quote">
+    </div>
+    <div class="links">
+      <div class="links__title">- LINKS -</div>
+      <div class="links__content">
+        <a class="bc link" href="/bc">BLOCKCHAIN</a>
+        <a class="peers link" href="/peers">PEERS</a>
+        <a class="miners link" href="/miners">MINERS</a>
+        <a class="block link" href="/block/index">BLOCK</a>
+        <a class="block link" href="/balance/pubKey">BALANCE</a>
+        <a class="block link" href="/transactions/pubKey">TRANSACTIONS</a>
+      </div>
+    </div>
+  </div>
+  <script>
+    const quote = document.getElementById('quote');
+    const quotes = [
+      'Just looking for a road home...',
+      'LEEEEEEROY JENKINS!',
+      'I am your worst nightmare!',
+      'Ooh, I\'ve never been here before.',
+      'Do not deny me!',
+      'I am the thing under the bed...',
+      'Orcs work to live, dwarfs live to work!',
+      'What an uncommon denominator!',
+      'Strength is not a lack of weakness...',
+    ];
+    const getRandomInt = (max) => Math.floor(Math.random() * max);
+    quote.innerText = quotes[getRandomInt(quotes.length)];
+
+    const links = document.getElementById('links');
+
+    links.onclick = async () => {
+      const res = await fetch(`/bc`, {
+        method: 'GET',
+        mode: 'cors',
+        headers: {
+          'Accept': 'application/json'
+        },
+      })
+      const json = await res.json();
+      console.log(json);
+    }
+  </script>
+</body>
+</html>

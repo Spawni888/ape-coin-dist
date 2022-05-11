@@ -1,0 +1,19 @@
+{
+  "name": "ape-coin",
+  "version": "0.1.0",
+  "main": "index.js",
+  "license": "MIT",
+  "author": "spawni888",
+  "engines": { "node": "16.x" },
+  "dependencies": {
+    "elliptic": "^6.5.4",
+    "express": "^4.18.1",
+    "lodash": "^4.17.21",
+    "ngrok": "^4.3.1",
+    "uuid": "^8.3.2",
+    "ws": "6.2.1"
+  },
+  "scripts": {
+    "start": "node index.js"
+  }
+}
