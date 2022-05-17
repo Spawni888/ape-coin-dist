@@ -56,6 +56,15 @@
           text-align: center;
           line-height: 1.3rem;
       }
+      .download {
+          opacity: 0.2;
+          transition: opacity .2s ease-in;
+          margin-top: 2%;
+          font-weight: bold;
+      }
+      .download:hover {
+          opacity: 0.5;
+      }
       .links {
           position: absolute;
           bottom: 1rem;
@@ -67,7 +76,7 @@
       }
       .links__title {
           opacity: .6;
-          margin-bottom: 10px;
+          margin-bottom: 0.34rem;
       }
       .links__content {
           display: flex;
@@ -104,8 +113,11 @@
     </div>
     <div class="quote" id="quote">
     </div>
+    <a class="download" href="https://github.com/Spawni888/ape-coin-dist/releases/download/v0.1.1/ape-coin-Setup-0.1.1.exe">
+      DOWNLOAD
+    </a>
     <div class="links">
-      <div class="links__title">- LINKS -</div>
+      <div class="links__title">- API -</div>
       <div class="links__content">
         <a class="bc link" href="/bc">BLOCKCHAIN</a>
         <a class="peers link" href="/peers">PEERS</a>
