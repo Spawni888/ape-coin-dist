@@ -79,9 +79,15 @@ app.get('/peers', (req, res) => {
 app.use((req, res) => res.sendFile(path.resolve(__dirname, 'index.html')));
 
 const server = app.listen(PORT, () => console.log(`Listening on ${PORT}`));
+const peers = [
+  'ws://ape-coin.herokuapp.com:80',
+  'ws://ape-coin-2.herokuapp.com:80',
+  'ws://flying-warp-clef.glitch.me:80',
+  'ws://disco-remarkable-nasturtium.glitch.me:80',
+];
 
 (async () => {
-  await p2pServer.listen({ server }, () => {
-    console.log(`P2P-server is spinning at ${PORT}!`)
+  await p2pServer.listen({ server, peers }, () => {
+    console.log(`P2P-server is spinning at ${ PORT }!`)
   });
 })();
