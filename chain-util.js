@@ -81,7 +81,7 @@ class ChainUtil {
       return Math.floor(value * 100) / 100;
     };
     // eslint-disable-next-line no-restricted-properties
-    return roundFloat(FIRST_MINING_REWARD * Math.pow(0.8, Math.floor((chain.length - 1) / 20)));
+    return roundFloat(FIRST_MINING_REWARD * Math.pow(0.9, Math.floor((chain.length - 1) / 120)));
   }
 }
 

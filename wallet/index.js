@@ -30,8 +30,8 @@ class Wallet {
       };
     }
 
-    amount = parseInt(amount, 10);
-    fee = parseInt(fee, 10);
+    amount = parseFloat(amount);
+    fee = parseFloat(fee);
     this.balance = this.calculateBalance(blockchain.chain);
 
     if (amount + fee > this.balance) {

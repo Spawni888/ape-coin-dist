@@ -2,10 +2,10 @@ const ChainUtil = require('../chain-util');
 const { MINER_WALLET, BLOCKCHAIN_WALLET } = require('../config');
 
 class Transaction {
-  constructor() {
-    this.id = ChainUtil.genId();
-    this.input = null;
-    this.outputs = [];
+  constructor(id = null, input = null, outputs = []) {
+    this.id = id || ChainUtil.genId();
+    this.input = input || null;
+    this.outputs = outputs;
   }
 
   update(senderWallet, recipient, amount, fee = 0) {
@@ -106,7 +106,6 @@ class Transaction {
         }
       });
     });
-
     return rewardTransaction.outputs[rewardTransaction.outputs.length - 1].amount
       === (ChainUtil.miningRewardAmount(chain) + fee);
   }

@@ -27,12 +27,19 @@ class TransactionPool extends EventEmitter {
 
   validTransactions() {
     return this.transactions.filter(transaction => {
-      const outputTotal = transaction.outputs.reduce(
-        (total, output) => total + parseInt(output.amount, 10),
+      // TODO: (REMOVE?) IT'S NOT WORKING RIGHT FOR DECIMAL NUMBERS I GUESS...
+      let outputTotal = transaction.outputs.reduce(
+        (total, output) => total + parseFloat(output.amount),
         0,
       );
-      if (transaction.input.amount !== outputTotal) {
+      // round down up to 2 decimals
+      const transactionInput = Math.floor(transaction.input.amount * 100) / 100;
+      outputTotal = Math.floor(outputTotal * 100) / 100;
+
+      if (transactionInput !== outputTotal) {
         console.log(`Invalid transaction from ${transaction.input.address}`);
+        console.log('transaction.input.amount !== outputTotal');
+        console.log(transaction);
         return false;
       }
 
@@ -50,7 +57,7 @@ class TransactionPool extends EventEmitter {
       .filter(transaction => {
         return transaction.outputs
           .find(output => output.address === MINER_WALLET)
-          .amount >= feeThreshold;
+          ?.amount >= feeThreshold;
       })
       .sort((a, b) => {
         let aFee = 0;
@@ -76,7 +83,7 @@ class TransactionPool extends EventEmitter {
     while (
       ChainUtil.sizeOfObjectInMb(suitableTransactions) < 1
       && selectedTransactions.length > 0
-    ) {
+      ) {
       suitableTransactions.push(selectedTransactions.pop());
     }
 
@@ -84,13 +91,13 @@ class TransactionPool extends EventEmitter {
   }
 
   pickTransactions(feeThreshold) {
-    this.transactions = this.validTransactions();
-
     return this.sortAndFilter(feeThreshold);
   }
 
   clean(chain) {
     if (!this.transactions.length || !chain.length) return;
+
+    this.transactions = this.validTransactions();
 
     const userBalanceMap = {};
     const deleteIndexes = [];
@@ -105,8 +112,13 @@ class TransactionPool extends EventEmitter {
 
       const transAmount = trans.outputs.reduce((acc, output) => {
         if (output.address === userPubKey) return acc;
-        return acc + parseInt(output.amount, 10);
+        return acc + parseFloat(output.amount);
       }, 0);
+
+      console.log('userBalanceMap');
+      console.log(userBalanceMap[userPubKey]);
+      console.log(transAmount);
+      console.log(trans);
 
       if (userBalanceMap[userPubKey] >= transAmount) {
         userBalanceMap[userPubKey] -= transAmount;
