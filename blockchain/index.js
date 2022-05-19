@@ -32,22 +32,8 @@ class Blockchain {
         || block.hash !== Block.blockHash(block)
         || !Block.validBlock(block, i, chain)
       ) {
-        console.log('block.lastHash !== lastBlock.hash');
-        console.log(block.lastHash !== lastBlock.hash);
-        console.log(block.lastHash);
-        console.log(lastBlock.hash);
-        console.log('-'.repeat(10));
-
-        console.log('block.hash !== Block.blockHash(block)');
-        console.log(block.hash !== Block.blockHash(block));
-        console.log(block.hash);
-        console.log(Block.blockHash(block));
-        console.log('-'.repeat(10));
-
-        console.log('!Block.validBlock(block, this)');
-        console.log(!Block.validBlock(block, i, this.chain));
-        console.log('-'.repeat(10));
-
+        console.log('Invalid block');
+        console.log(block);
         return false;
       }
     }

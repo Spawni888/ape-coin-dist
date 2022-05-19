@@ -88,6 +88,31 @@ class Transaction {
     };
   }
 
+  static validate(transaction) {
+    // TODO: (REMOVE?) IT'S NOT WORKING RIGHT FOR DECIMAL NUMBERS I GUESS...
+    let outputTotal = transaction.outputs.reduce(
+      (total, output) => total + parseFloat(output.amount),
+      0,
+    );
+    // round down up to 2 decimals
+    const transactionInput = Math.floor(transaction.input.amount * 100) / 100;
+    outputTotal = Math.floor(outputTotal * 100) / 100;
+
+    if (transactionInput !== outputTotal) {
+      console.log(`Invalid transaction from ${transaction.input.address}`);
+      console.log('transaction.input.amount !== outputTotal');
+      console.log(transaction);
+      return false;
+    }
+
+    if (!Transaction.verifyTransaction(transaction)) {
+      console.log(`Invalid signature from ${transaction.input.address}`);
+      return false;
+    }
+
+    return true;
+  }
+
   static verifyTransaction(transaction) {
     return ChainUtil.verifySignature(
       transaction.input.address,

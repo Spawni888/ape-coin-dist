@@ -2,13 +2,55 @@ const { EventEmitter } = require('events');
 const cloneDeep = require('lodash/cloneDeep');
 const Wallet = require('./index');
 const Transaction = require('./transaction');
-const { MINER_WALLET } = require('../config');
+const { MINER_WALLET, BLOCKCHAIN_WALLET } = require('../config');
 const ChainUtil = require('../chain-util');
 
 class TransactionPool extends EventEmitter {
   constructor() {
     super();
     this.transactions = [];
+  }
+
+  static validateTransactionSequence(transactions, chain) {
+    const userBalanceMap = {};
+    const deleteIndexes = [];
+
+    transactions = transactions.sort((a, b) => a.input.timestamp - b.input.timestamp);
+    transactions.forEach((trans, index) => {
+      if (trans.input.address === BLOCKCHAIN_WALLET) return;
+      const userPubKey = trans.input.address;
+
+      if (!userBalanceMap[userPubKey]) {
+        userBalanceMap[userPubKey] = Wallet.calculateBalance(chain, userPubKey);
+      }
+
+      let userOutput = null;
+      const transAmount = trans.outputs.reduce((acc, output) => {
+        if (output.address === userPubKey) {
+          userOutput = output;
+          return acc;
+        }
+        return acc + parseFloat(output.amount);
+      }, 0);
+
+      if (userBalanceMap[userPubKey] >= transAmount) {
+        userBalanceMap[userPubKey] -= transAmount;
+
+        if (userOutput && userOutput.amount === userBalanceMap[userPubKey]) {
+          return;
+        }
+        console.log('Wrong user output amount!');
+      }
+      deleteIndexes.push(index);
+    });
+
+    [...new Set(deleteIndexes)].forEach(index => {
+      console.log('-'.repeat(30));
+      console.log('INVALID TRANSACTIONS REMOVED:');
+      console.log(transactions.splice(index, 1));
+      console.log('-'.repeat(30));
+    });
+    return transactions;
   }
 
   replaceOrAddTransaction(transaction) {
@@ -25,31 +67,8 @@ class TransactionPool extends EventEmitter {
     return this.transactions.find(t => t.input.address === address);
   }
 
-  validTransactions() {
-    return this.transactions.filter(transaction => {
-      // TODO: (REMOVE?) IT'S NOT WORKING RIGHT FOR DECIMAL NUMBERS I GUESS...
-      let outputTotal = transaction.outputs.reduce(
-        (total, output) => total + parseFloat(output.amount),
-        0,
-      );
-      // round down up to 2 decimals
-      const transactionInput = Math.floor(transaction.input.amount * 100) / 100;
-      outputTotal = Math.floor(outputTotal * 100) / 100;
-
-      if (transactionInput !== outputTotal) {
-        console.log(`Invalid transaction from ${transaction.input.address}`);
-        console.log('transaction.input.amount !== outputTotal');
-        console.log(transaction);
-        return false;
-      }
-
-      if (!Transaction.verifyTransaction(transaction)) {
-        console.log(`Invalid signature from ${transaction.input.address}`);
-        return false;
-      }
-
-      return true;
-    });
+  getValidTransactions() {
+    return this.transactions.filter(Transaction.validate);
   }
 
   sortAndFilter(feeThreshold = 0) {
@@ -97,43 +116,9 @@ class TransactionPool extends EventEmitter {
   clean(chain) {
     if (!this.transactions.length || !chain.length) return;
 
-    this.transactions = this.validTransactions();
+    this.transactions = this.getValidTransactions();
 
-    const userBalanceMap = {};
-    const deleteIndexes = [];
-
-    this.transactions = this.transactions.sort((a, b) => a.input.timestamp - b.input.timestamp);
-    this.transactions.forEach((trans, index) => {
-      const userPubKey = trans.input.address;
-
-      if (!userBalanceMap[userPubKey]) {
-        userBalanceMap[userPubKey] = Wallet.calculateBalance(chain, userPubKey);
-      }
-
-      const transAmount = trans.outputs.reduce((acc, output) => {
-        if (output.address === userPubKey) return acc;
-        return acc + parseFloat(output.amount);
-      }, 0);
-
-      console.log('userBalanceMap');
-      console.log(userBalanceMap[userPubKey]);
-      console.log(transAmount);
-      console.log(trans);
-
-      if (userBalanceMap[userPubKey] >= transAmount) {
-        userBalanceMap[userPubKey] -= transAmount;
-        return;
-      }
-      deleteIndexes.push(index);
-    });
-
-    [...new Set(deleteIndexes)].forEach(index => {
-      console.log('-'.repeat(30));
-      console.log('INVALID TRANSACTIONS REMOVED:');
-      console.log(this.transactions.splice(index, 1));
-      console.log('-'.repeat(30));
-    });
-
+    this.transactions = TransactionPool.validateTransactionSequence(this.transactions, chain);
     this.removeDuplicates(chain);
   }
 

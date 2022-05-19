@@ -408,6 +408,7 @@ class P2pServer extends EventEmitter {
           });
           resolve(true);
         }, 5000);
+        return;
       }
 
       clearTimeout(this.blockchain.checkTimer);
@@ -441,7 +442,7 @@ class P2pServer extends EventEmitter {
           if (data.chainLength > this.blockchain.chain.length) return;
 
           socket.send(JSON.stringify({
-            type: MESSAGE_TYPES.reqChainCheck,
+            type: MESSAGE_TYPES.resChainCheck,
             data: {
               block: this.blockchain.chain[data.chainLength - 1],
             },

@@ -107,7 +107,8 @@ class Wallet {
           : current),
       );
 
-      balance = recentInputT.outputs.find(output => output.address === pubKey).amount;
+      balance = recentInputT.outputs
+        .find(output => output.address === pubKey)?.amount || INITIAL_BALANCE;
       startTime = recentInputT.input.timestamp;
     }
 

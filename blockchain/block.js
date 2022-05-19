@@ -1,5 +1,6 @@
 const ChainUtil = require('../chain-util');
 const Transaction = require('../wallet/transaction');
+const TransactionPool = require('../wallet/transactionPool');
 const { DIFFICULTY, MINE_RATE } = require('../config');
 
 class Block {
@@ -80,24 +81,31 @@ class Block {
 
   static validBlock(block, blockIndex, chain = []) {
     let rewardTransaction;
+    const usersTransactions = [];
 
     if (!Array.isArray(block.data)) {
       console.log('Block Data should be an Array');
       return false;
     }
 
-    const usersTransactions = block.data.filter(transaction => {
+    for (let i = 0; i < block.data.length; i++) {
+      const transaction = block.data[i];
+
       if (transaction.input.signature) {
-        return Transaction.verifyTransaction(transaction);
+        const isValid = Transaction.validate(transaction);
+        if (!isValid) return false;
+
+        usersTransactions.push(transaction);
+      } else {
+        rewardTransaction = transaction;
       }
-      rewardTransaction = transaction;
-      return false;
-    });
+    }
 
     if (usersTransactions.length + 1 !== block.data.length) {
       console.log('There are should be only one Reward Transaction!');
       return false;
     }
+
     if (
       !rewardTransaction
       || !Transaction.verifyRewardTransaction(
@@ -106,10 +114,23 @@ class Block {
         chain.slice(0, blockIndex),
       )
     ) {
+      console.log('-'.repeat(30));
       console.log('Wrong reward transaction. Block is corrupted!');
+      console.log('block');
       console.log(block);
+      console.log('rewardTransaction');
+      console.log(rewardTransaction);
+      console.log('-'.repeat(30));
       return false;
     }
+
+    const validTransactions = TransactionPool
+      .validateTransactionSequence(usersTransactions, chain.slice(0, blockIndex));
+    if (validTransactions.length !== usersTransactions.length) {
+      console.log('Invalid block transactions sequence!');
+      return false;
+    }
+
     return true;
   }
 }
