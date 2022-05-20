@@ -244,8 +244,6 @@ class P2pServer extends EventEmitter {
         });
 
         console.log(`Connected to peer: ${serverAddress}`);
-        // plus one because of "retries - 1" below
-        retries = P2P_SOCKET_RECONNECTION_RETRIES + 1;
       });
 
       socket.on('error', (err) => {
@@ -363,9 +361,11 @@ class P2pServer extends EventEmitter {
         console.log('+'.repeat(10));
 
         this.blockchain.checking = true;
+        this.blockchain.check = [];
         this.blockchain.check.push(this.blockchain.chain[this.blockchain.chain.length - 1]);
         this.blockchain.check.push(newChain[newChain.length - 1]);
         this.broadcastReqChainCheck();
+        clearTimeout(this.blockchain.checkTimer);
 
         this.blockchain.checkTimer = setTimeout(() => {
           this.blockchain.checking = false;

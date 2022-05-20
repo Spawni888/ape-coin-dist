@@ -12,11 +12,13 @@ class TransactionPool extends EventEmitter {
   }
 
   static validateTransactionSequence(transactions, chain) {
+    transactions = transactions.sort((a, b) => a.input.timestamp - b.input.timestamp);
+
     const userBalanceMap = {};
     const deleteIndexes = [];
+    const validTransactions = cloneDeep(transactions);
 
-    transactions = transactions.sort((a, b) => a.input.timestamp - b.input.timestamp);
-    transactions.forEach((trans, index) => {
+    validTransactions.forEach((trans, index) => {
       if (trans.input.address === BLOCKCHAIN_WALLET) return;
       const userPubKey = trans.input.address;
 
@@ -47,10 +49,10 @@ class TransactionPool extends EventEmitter {
     [...new Set(deleteIndexes)].forEach(index => {
       console.log('-'.repeat(30));
       console.log('INVALID TRANSACTIONS REMOVED:');
-      console.log(transactions.splice(index, 1));
+      console.log(validTransactions.splice(index, 1));
       console.log('-'.repeat(30));
     });
-    return transactions;
+    return validTransactions;
   }
 
   replaceOrAddTransaction(transaction) {
